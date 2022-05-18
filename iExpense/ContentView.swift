@@ -7,24 +7,35 @@
 
 import SwiftUI
 
-class User: ObservableObject{
-	var firstName = "Bilbo"
-	var lastName = "Baggins"
+struct SecondView: View{
+	@Environment(\.dismiss) var dismiss
+	let name: String
+	
+	var body: some View{
+		Button(name){
+			dismiss()
+		}
+	}
 }
 
 struct ContentView: View {
-	@StateObject var user = User()
+	@State private var showingSheet = false
 	
     var body: some View {
-		 Text("Your name is \(user.firstName) \(user.lastName)")
-		 
-		 TextField("First Name ",text: $user.firstName)
-		 TextField("Last Name ",text: $user.lastName)
+		 Button("Show Sheet"){
+			 showingSheet.toggle()
+		 }
+		 .sheet(isPresented: $showingSheet) {
+			 SecondView(name: "Jae Cho")
+		 }
+
+
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+			 .previewDevice("iPhone 13 Mini")
     }
 }
