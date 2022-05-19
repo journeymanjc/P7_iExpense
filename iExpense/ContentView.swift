@@ -45,36 +45,61 @@ class Expenses: ObservableObject{
 struct ContentView: View {
 	@StateObject var expenses = Expenses()
 	@State private var showingAddExpense = false
+	
+	//because i can't figure out how to use onDelete with a sublist i'll create 2 new sublists and then remove the appropriate index on each.
+	@State var personalExpenses: [ExpenseItem] = []
+	@State var businessExpenses: [ExpenseItem] = []
 
     var body: some View {
 		 
 		 NavigationView{
 			 VStack{
-				 
-			 }
-			 List{
-				 ForEach(categorizeList(with: "Business")){ item in
-					 HStack{
-						 VStack(alignment: .leading){
-							 Text(item.name)
-								 .font(.headline)
-							 Text(item.type)
+				 List{
+					 ForEach(categorizeList(with: "Business")){ item in
+						 HStack{
+							 VStack(alignment: .leading){
+								 Text(item.name)
+									 .font(.headline)
+								 Text(item.type)
+							 }
+							 Spacer()
+							 MyTextView(amount: item.amount)
+							 
 						 }
-						 Spacer()
-						 MyTextView(amount: item.amount)
-						 
+					 }
+					 .onDelete(perform: removeItemsBusiness)
+				 }
+				 .toolbar {
+					 Button {
+						 showingAddExpense = true
+					 } label : {
+						 Image(systemName: "plus")
 					 }
 				 }
-				 .onDelete(perform: removeItems)
-			 }
-			 .toolbar {
-				 Button {
-					 showingAddExpense = true
-				 } label : {
-					 Image(systemName: "plus")
+				 Spacer()
+				 List{
+					 ForEach(categorizeList(with: "Personal")){ item in
+						 HStack{
+							 VStack(alignment: .leading){
+								 Text(item.name)
+									 .font(.headline)
+								 Text(item.type)
+							 }
+							 Spacer()
+							 MyTextView(amount: item.amount)
+							 
+						 }
+					 }
+					 .onDelete(perform: removeItemPersonal)
+				 }
+				 .toolbar {
+					 Button {
+						 showingAddExpense = true
+					 } label : {
+						 Image(systemName: "plus")
+					 }
 				 }
 			 }
-			 
 		 }
 		 .sheet(isPresented: $showingAddExpense) {
 			 //show an AddView here
@@ -82,13 +107,23 @@ struct ContentView: View {
 		 }
     }
 	
-	func removeItems(at offsets: IndexSet) {
-		expenses.items.remove(atOffsets: offsets)
+	func removeItemsBusiness(at offsets: IndexSet) {
+		businessExpenses.remove(atOffsets: offsets)
+	}
+	func removeItemPersonal(at offsets: IndexSet) {
+		personalExpenses.remove(atOffsets: offsets)
 	}
 	
 	func categorizeList(with category: String) -> [ExpenseItem]{
 		let sublist = expenses.items.filter{ $0.type == category }
-		return sublist
+		
+		if category == "Business"{
+			businessExpenses = sublist
+			return sublist
+		}else {
+			personalExpenses = sublist
+			return sublist
+		}
 	}
 
 }
